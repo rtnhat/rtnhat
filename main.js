@@ -1,41 +1,33 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     const table = document.getElementById('data-table');
+    
+    // Load saved data from Local Storage
+    loadSavedData();
 
-    // Hàm để lưu dữ liệu vào Local Storage
-    function saveData() {
-        const rows = table.rows;
-        let data = [];
+    // Add event listener to save data when input changes
+    table.addEventListener('input', function(event) {
+        const cell = event.target;
+        saveData(cell.parentElement.rowIndex, cell.cellIndex, cell.textContent);
+    });
 
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].cells;
-            let rowData = [];
-            for (let j = 0; j < cells.length; j++) {
-                rowData.push(cells[j].textContent);
-            }
-            data.push(rowData);
-        }
-
-        localStorage.setItem('tableData', JSON.stringify(data));
+    function saveData(row, column, value) {
+        const key = `cell_${row}_${column}`;
+        localStorage.setItem(key, value);
     }
 
-    // Hàm để tải dữ liệu từ Local Storage
-    function loadData() {
-        const data = JSON.parse(localStorage.getItem('tableData'));
+    function loadData(row, column) {
+        const key = `cell_${row}_${column}`;
+        return localStorage.getItem(key);
+    }
 
-        if (data) {
-            for (let i = 0; i < data.length; i++) {
-                const row = table.rows[i];
-                const rowData = data[i];
-                for (let j = 0; j < rowData.length; j++) {
-                    row.cells[j].textContent = rowData[j];
+    function loadSavedData() {
+        for (let row = 0; row < table.rows.length; row++) {
+            for (let col = 0; col < table.rows[row].cells.length; col++) {
+                const value = loadData(row, col);
+                if (value !== null) {
+                    table.rows[row].cells[col].textContent = value;
                 }
             }
         }
     }
-
-    // Lưu dữ liệu mỗi khi có thay đổi
-    table.addEventListener('input', saveData);
-
-    // Tải dữ liệu khi trang được tải
-    loadData();
 });
